@@ -160,9 +160,9 @@ const Index = () => {
                 <BarChart3 className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Trading Pulse Journal</h1>
+                <h1 className="text-2xl font-bold">JournalPaper</h1>
                 <p className="text-sm text-muted-foreground">
-                  Professional trading analytics & journal
+                 Journaling One Step for the futures.
                 </p>
               </div>
             </div>
@@ -300,21 +300,17 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="charts">
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="flex justify-center">
+              <div className="w-full max-w-5xl">
                 <TradingViewWidget
-                  symbol="OANDA:XAUUSD"
-                  title="Gold/USD (XAUUSD)"
-                  height="500"
+                symbol="OANDA:XAUUSD"
+                title="TradingView Charts"
+                height="600"
                 />
-                <TradingViewWidget
-                  symbol="TVC:DXY"
-                  title="US Dollar Index (DXY)"
-                  height="500"
-                />
-              </div>
-            </div>
-          </TabsContent>
+                </div>
+                </div>
+                </TabsContent>
+
 
           <TabsContent value="trades">
             <TradeList
