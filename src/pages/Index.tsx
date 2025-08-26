@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,141 +11,143 @@ import {
   BookOpen,
   Settings,
   Target,
-  DollarSign
+  DollarSign,
+  LogOut,
+  User
 } from 'lucide-react';
 import { TradeForm } from '@/components/trading/TradeForm';
 import { TradeList } from '@/components/trading/TradeList';
 import { PortfolioStats } from '@/components/trading/PortfolioStats';
-import { Trade } from '@/types/trading';
+import { TradingViewWidget } from '@/components/charts/TradingViewWidget';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useTrades, DatabaseTrade } from '@/hooks/useTrades';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { trades, loading, addTrade, updateTrade, deleteTrade } = useTrades();
   const { toast } = useToast();
-  const [trades, setTrades] = useState<Trade[]>([]);
-  const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+  const [editingTrade, setEditingTrade] = useState<DatabaseTrade | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(false);
 
-  // Mock data for demonstration
-  useEffect(() => {
-    const mockTrades: Trade[] = [
-      {
-        id: '1',
-        userId: 'user1',
-        assetType: 'FOREX',
-        symbol: 'EUR/USD',
-        assetName: 'Euro/US Dollar',
-        tradeType: 'BUY',
-        status: 'CLOSED',
-        entryPrice: 1.0850,
-        exitPrice: 1.0920,
-        quantity: 100000,
-        entryDate: '2024-01-15',
-        exitDate: '2024-01-16',
-        stopLoss: 1.0800,
-        takeProfit: 1.0950,
-        fees: 15,
-        notes: 'EUR strength after ECB announcement',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        userId: 'user1',
-        assetType: 'COMMODITY',
-        symbol: 'GC',
-        assetName: 'Gold Futures',
-        tradeType: 'BUY',
-        status: 'OPEN',
-        entryPrice: 2050.50,
-        quantity: 10,
-        entryDate: '2024-01-20',
-        stopLoss: 2000.00,
-        takeProfit: 2150.00,
-        fees: 25,
-        notes: 'Inflation hedge play',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: '3',
-        userId: 'user1',
-        assetType: 'STOCK',
-        symbol: 'AAPL',
-        assetName: 'Apple Inc.',
-        tradeType: 'BUY',
-        status: 'CLOSED',
-        entryPrice: 180.25,
-        exitPrice: 175.80,
-        quantity: 50,
-        entryDate: '2024-01-10',
-        exitDate: '2024-01-18',
-        fees: 10,
-        notes: 'Earnings disappointment',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-    setTrades(mockTrades);
-  }, []);
+  // Redirect to auth if not logged in
+  if (!authLoading && !user) {
+    return <Navigate to="/auth" replace />;
+  }
 
-  const handleAddTrade = async (tradeData: Partial<Trade>) => {
-    setLoading(true);
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleAddTrade = async (tradeData: any) => {
     try {
-      // In a real app, this would be an API call
-      const newTrade: Trade = {
-        ...tradeData,
-        id: Date.now().toString(),
-        userId: 'user1',
-        status: 'OPEN',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as Trade;
-
-      setTrades(prev => [newTrade, ...prev]);
+      await addTrade({
+        symbol: tradeData.symbol,
+        trade_type: tradeData.tradeType,
+        status: tradeData.status || 'open',
+        entry_price: tradeData.entryPrice,
+        exit_price: tradeData.exitPrice,
+        quantity: tradeData.quantity,
+        entry_date: tradeData.entryDate,
+        exit_date: tradeData.exitDate,
+        fees: tradeData.fees || 0,
+        strategy: tradeData.strategy,
+        setup_description: tradeData.notes,
+        tags: tradeData.tags
+      });
       setActiveTab('trades');
-    } catch (error) {
+      toast({
+        title: "Trade Added",
+        description: `Successfully added ${tradeData.symbol} trade`,
+      });
+    } catch (error: any) {
       console.error('Error adding trade:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add trade",
+        variant: "destructive",
+      });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleEditTrade = async (tradeData: Partial<Trade>) => {
+  const handleEditTrade = async (tradeData: any) => {
     if (!editingTrade) return;
     
-    setLoading(true);
     try {
-      const updatedTrade: Trade = {
-        ...editingTrade,
-        ...tradeData,
-        updatedAt: new Date().toISOString(),
-      };
-
-      setTrades(prev => 
-        prev.map(trade => trade.id === editingTrade.id ? updatedTrade : trade)
-      );
+      await updateTrade(editingTrade.id, {
+        symbol: tradeData.symbol,
+        trade_type: tradeData.tradeType,
+        status: tradeData.status,
+        entry_price: tradeData.entryPrice,
+        exit_price: tradeData.exitPrice,
+        quantity: tradeData.quantity,
+        entry_date: tradeData.entryDate,
+        exit_date: tradeData.exitDate,
+        fees: tradeData.fees || 0,
+        strategy: tradeData.strategy,
+        setup_description: tradeData.notes,
+        tags: tradeData.tags
+      });
+      
       setEditingTrade(null);
       setActiveTab('trades');
-    } catch (error) {
+      toast({
+        title: "Trade Updated",
+        description: `Successfully updated ${tradeData.symbol} trade`,
+      });
+    } catch (error: any) {
       console.error('Error updating trade:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update trade",
+        variant: "destructive",
+      });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleDeleteTrade = (tradeId: string) => {
-    setTrades(prev => prev.filter(trade => trade.id !== tradeId));
-    toast({
-      title: "Trade Deleted",
-      description: "Trade has been removed from your journal",
-    });
+  const handleDeleteTrade = async (tradeId: string) => {
+    try {
+      await deleteTrade(tradeId);
+      toast({
+        title: "Trade Deleted",
+        description: "Trade has been removed from your journal",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to delete trade",
+        variant: "destructive",
+      });
+    }
   };
 
-  const openTrades = trades.filter(trade => trade.status === 'OPEN').length;
+  const openTrades = trades.filter(trade => trade.status === 'open').length;
   const totalTrades = trades.length;
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -176,16 +179,35 @@ const Index = () => {
                 </div>
               </div>
               
-              <Button 
-                onClick={() => {
-                  setEditingTrade(null);
-                  setActiveTab('add-trade');
-                }}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Trade
-              </Button>
+              <div className="flex items-center gap-2">
+                {user && (
+                  <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                    <User className="w-4 h-4" />
+                    {user.email}
+                  </div>
+                )}
+                
+                <Button 
+                  onClick={() => {
+                    setEditingTrade(null);
+                    setActiveTab('add-trade');
+                  }}
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Trade
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -194,10 +216,14 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-4 mx-auto lg:mx-0">
+          <TabsList className="grid w-full max-w-lg grid-cols-5 mx-auto lg:mx-0">
             <TabsTrigger value="overview" className="gap-2">
               <TrendingUp className="w-4 h-4" />
               <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="charts" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Charts</span>
             </TabsTrigger>
             <TabsTrigger value="trades" className="gap-2">
               <BookOpen className="w-4 h-4" />
@@ -235,13 +261,13 @@ const Index = () => {
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-neutral">
-                        {trades.filter(t => t.assetType === 'FOREX').length}
+                        {trades.filter(t => t.symbol?.includes('/')).length}
                       </div>
                       <div className="text-sm text-muted-foreground">Forex Trades</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-amber-400">
-                        {trades.filter(t => t.assetType === 'COMMODITY').length}
+                        {trades.filter(t => t.symbol?.includes('XAUUSD') || t.symbol?.includes('DXY')).length}
                       </div>
                       <div className="text-sm text-muted-foreground">Commodities</div>
                     </div>
@@ -249,16 +275,76 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              <PortfolioStats trades={trades} />
+              <PortfolioStats trades={trades.map(trade => ({
+                id: trade.id,
+                userId: trade.user_id,
+                assetType: trade.symbol?.includes('/') ? 'FOREX' as const : 
+                          trade.symbol?.includes('XAUUSD') || trade.symbol?.includes('DXY') ? 'COMMODITY' as const :
+                          'STOCK' as const,
+                symbol: trade.symbol,
+                assetName: trade.symbol,
+                tradeType: trade.trade_type === 'BUY' ? 'BUY' as const : 'SELL' as const,
+                status: trade.status === 'open' ? 'OPEN' as const : 
+                       trade.status === 'closed' ? 'CLOSED' as const : 'PENDING' as const,
+                entryPrice: trade.entry_price,
+                exitPrice: trade.exit_price,
+                quantity: trade.quantity,
+                entryDate: trade.entry_date,
+                exitDate: trade.exit_date,
+                fees: trade.fees,
+                notes: trade.setup_description,
+                createdAt: trade.created_at,
+                updatedAt: trade.updated_at,
+              }))} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="charts">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <TradingViewWidget
+                  symbol="OANDA:XAUUSD"
+                  title="Gold/USD (XAUUSD)"
+                  height="500"
+                />
+                <TradingViewWidget
+                  symbol="TVC:DXY"
+                  title="US Dollar Index (DXY)"
+                  height="500"
+                />
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="trades">
             <TradeList
-              trades={trades}
+              trades={trades.map(trade => ({
+                id: trade.id,
+                userId: trade.user_id,
+                assetType: trade.symbol?.includes('/') ? 'FOREX' as const : 
+                          trade.symbol?.includes('XAUUSD') || trade.symbol?.includes('DXY') ? 'COMMODITY' as const :
+                          'STOCK' as const,
+                symbol: trade.symbol,
+                assetName: trade.symbol,
+                tradeType: trade.trade_type === 'BUY' ? 'BUY' as const : 'SELL' as const,
+                status: trade.status === 'open' ? 'OPEN' as const : 
+                       trade.status === 'closed' ? 'CLOSED' as const : 'PENDING' as const,
+                entryPrice: trade.entry_price,
+                exitPrice: trade.exit_price,
+                quantity: trade.quantity,
+                entryDate: trade.entry_date,
+                exitDate: trade.exit_date,
+                fees: trade.fees,
+                notes: trade.setup_description,
+                createdAt: trade.created_at,
+                updatedAt: trade.updated_at,
+              }))}
               onEdit={(trade) => {
-                setEditingTrade(trade);
-                setActiveTab('add-trade');
+                const dbTrade = trades.find(t => t.id === trade.id);
+                if (dbTrade) {
+                  setEditingTrade(dbTrade);
+                  setActiveTab('add-trade');
+                }
               }}
               onDelete={handleDeleteTrade}
               loading={loading}
@@ -268,13 +354,43 @@ const Index = () => {
           <TabsContent value="add-trade">
             <TradeForm
               onSubmit={editingTrade ? handleEditTrade : handleAddTrade}
-              initialData={editingTrade || undefined}
+              initialData={editingTrade ? {
+                symbol: editingTrade.symbol,
+                tradeType: editingTrade.trade_type === 'BUY' ? 'BUY' : 'SELL',
+                entryPrice: editingTrade.entry_price,
+                exitPrice: editingTrade.exit_price,
+                quantity: editingTrade.quantity,
+                entryDate: editingTrade.entry_date,
+                exitDate: editingTrade.exit_date,
+                fees: editingTrade.fees,
+                notes: editingTrade.setup_description,
+              } : undefined}
               isEditing={!!editingTrade}
             />
           </TabsContent>
 
           <TabsContent value="analytics">
-            <PortfolioStats trades={trades} />
+            <PortfolioStats trades={trades.map(trade => ({
+              id: trade.id,
+              userId: trade.user_id,
+              assetType: trade.symbol?.includes('/') ? 'FOREX' as const : 
+                        trade.symbol?.includes('XAUUSD') || trade.symbol?.includes('DXY') ? 'COMMODITY' as const :
+                        'STOCK' as const,
+              symbol: trade.symbol,
+              assetName: trade.symbol,
+              tradeType: trade.trade_type === 'BUY' ? 'BUY' as const : 'SELL' as const,
+              status: trade.status === 'open' ? 'OPEN' as const : 
+                     trade.status === 'closed' ? 'CLOSED' as const : 'PENDING' as const,
+              entryPrice: trade.entry_price,
+              exitPrice: trade.exit_price,
+              quantity: trade.quantity,
+              entryDate: trade.entry_date,
+              exitDate: trade.exit_date,
+              fees: trade.fees,
+              notes: trade.setup_description,
+              createdAt: trade.created_at,
+              updatedAt: trade.updated_at,
+            }))} />
           </TabsContent>
         </Tabs>
       </main>

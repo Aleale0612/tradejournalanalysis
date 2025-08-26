@@ -65,6 +65,8 @@ export const FOREX_PAIRS: AssetInfo[] = [
 
 // Commodities
 export const COMMODITIES: AssetInfo[] = [
+  { symbol: 'OANDA:XAUUSD', name: 'Gold/US Dollar', type: 'COMMODITY', currency: 'USD', exchange: 'OANDA' },
+  { symbol: 'TVC:DXY', name: 'US Dollar Index', type: 'COMMODITY', currency: 'USD', exchange: 'TVC' },
   { symbol: 'GC', name: 'Gold Futures', type: 'COMMODITY', currency: 'USD', exchange: 'COMEX' },
   { symbol: 'SI', name: 'Silver Futures', type: 'COMMODITY', currency: 'USD', exchange: 'COMEX' },
   { symbol: 'CL', name: 'Crude Oil WTI', type: 'COMMODITY', currency: 'USD', exchange: 'NYMEX' },
