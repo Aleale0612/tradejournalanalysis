@@ -20,13 +20,14 @@ export default {
 		extend: {
 			colors: {
 				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
+				input: 'hsl(var(--input))',  
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -50,17 +51,26 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					foreground: 'hsl(var(--card-foreground))',
+					elevated: 'hsl(var(--card-elevated))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				// Trading-specific colors
+				trading: {
+					bg: 'hsl(var(--trading-bg))',
+					surface: 'hsl(var(--trading-surface))',
+					elevated: 'hsl(var(--trading-surface-elevated))'
+				},
+				profit: {
+					DEFAULT: 'hsl(var(--profit))',
+					bg: 'hsl(var(--profit-bg))'
+				},
+				loss: {
+					DEFAULT: 'hsl(var(--loss))',
+					bg: 'hsl(var(--loss-bg))'
+				},
+				neutral: {
+					DEFAULT: 'hsl(var(--neutral))',
+					bg: 'hsl(var(--neutral-bg))'
 				}
 			},
 			borderRadius: {
