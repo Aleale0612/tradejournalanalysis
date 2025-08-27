@@ -14,6 +14,119 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string
+          role: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          session_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          session_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          session_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      embeddings: {
+        Row: {
+          created_at: string | null
+          embedding: string | null
+          id: string
+          item_id: string | null
+          item_type: string | null
+          text_content: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          item_id?: string | null
+          item_type?: string | null
+          text_content?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          item_id?: string | null
+          item_type?: string | null
+          text_content?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      portfolio_snapshots: {
+        Row: {
+          balance: number | null
+          equity: number | null
+          id: string
+          positions: Json | null
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          equity?: number | null
+          id?: string
+          positions?: Json | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          equity?: number | null
+          id?: string
+          positions?: Json | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       portfolios: {
         Row: {
           account_type: string | null
@@ -313,7 +426,115 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
+      get_top_strategies: {
+        Args: { limit_count?: number; user_uuid: string }
+        Returns: {
+          strategy: string
+          total_profit: number
+          total_trades: number
+        }[]
+      }
+      get_weekly_performance: {
+        Args: { user_uuid: string }
+        Returns: {
+          best_trade: number
+          total_profit: number
+          win_rate: number
+          worst_trade: number
+        }[]
+      }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
