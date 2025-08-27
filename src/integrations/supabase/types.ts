@@ -174,7 +174,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_balance_idr: number | null
           created_at: string
+          default_currency: string | null
+          default_risk_percentage: number | null
           display_name: string | null
           id: string
           preferred_currency: string | null
@@ -184,7 +187,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_balance_idr?: number | null
           created_at?: string
+          default_currency?: string | null
+          default_risk_percentage?: number | null
           display_name?: string | null
           id?: string
           preferred_currency?: string | null
@@ -194,7 +200,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_balance_idr?: number | null
           created_at?: string
+          default_currency?: string | null
+          default_risk_percentage?: number | null
           display_name?: string | null
           id?: string
           preferred_currency?: string | null
@@ -261,63 +270,135 @@ export type Database = {
           },
         ]
       }
+      risk_calculations: {
+        Row: {
+          account_balance_idr: number
+          created_at: string | null
+          entry_price: number
+          id: string
+          lot_size: number
+          reward_amount_idr: number | null
+          risk_amount_idr: number
+          risk_percentage: number
+          risk_reward_ratio: number | null
+          stop_loss: number
+          symbol: string
+          take_profit: number | null
+          user_id: string
+        }
+        Insert: {
+          account_balance_idr: number
+          created_at?: string | null
+          entry_price: number
+          id?: string
+          lot_size: number
+          reward_amount_idr?: number | null
+          risk_amount_idr: number
+          risk_percentage: number
+          risk_reward_ratio?: number | null
+          stop_loss: number
+          symbol: string
+          take_profit?: number | null
+          user_id: string
+        }
+        Update: {
+          account_balance_idr?: number
+          created_at?: string | null
+          entry_price?: number
+          id?: string
+          lot_size?: number
+          reward_amount_idr?: number | null
+          risk_amount_idr?: number
+          risk_percentage?: number
+          risk_reward_ratio?: number | null
+          stop_loss?: number
+          symbol?: string
+          take_profit?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
+          account_balance_idr: number | null
           created_at: string
+          currency: string | null
           entry_date: string
           entry_price: number
           exit_date: string | null
           exit_price: number | null
           fees: number | null
           id: string
+          lot_size: number | null
           portfolio_id: string
           profit_loss: number | null
           quantity: number
+          risk_amount_idr: number | null
+          risk_percentage: number | null
+          risk_reward_ratio: number | null
           setup_description: string | null
           status: string
+          stop_loss: number | null
           strategy: string | null
           symbol: string
           tags: string[] | null
+          take_profit: number | null
           trade_type: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          account_balance_idr?: number | null
           created_at?: string
+          currency?: string | null
           entry_date: string
           entry_price: number
           exit_date?: string | null
           exit_price?: number | null
           fees?: number | null
           id?: string
+          lot_size?: number | null
           portfolio_id: string
           profit_loss?: number | null
           quantity: number
+          risk_amount_idr?: number | null
+          risk_percentage?: number | null
+          risk_reward_ratio?: number | null
           setup_description?: string | null
           status?: string
+          stop_loss?: number | null
           strategy?: string | null
           symbol: string
           tags?: string[] | null
+          take_profit?: number | null
           trade_type: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          account_balance_idr?: number | null
           created_at?: string
+          currency?: string | null
           entry_date?: string
           entry_price?: number
           exit_date?: string | null
           exit_price?: number | null
           fees?: number | null
           id?: string
+          lot_size?: number | null
           portfolio_id?: string
           profit_loss?: number | null
           quantity?: number
+          risk_amount_idr?: number | null
+          risk_percentage?: number | null
+          risk_reward_ratio?: number | null
           setup_description?: string | null
           status?: string
+          stop_loss?: number | null
           strategy?: string | null
           symbol?: string
           tags?: string[] | null
+          take_profit?: number | null
           trade_type?: string
           updated_at?: string
           user_id?: string
