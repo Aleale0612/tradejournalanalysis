@@ -24,6 +24,13 @@ export interface Trade {
   tags?: string[];
   createdAt: string;
   updatedAt: string;
+  // New fields for risk management
+  lot_size?: number;
+  risk_reward_ratio?: number;
+  risk_amount_idr?: number;
+  currency?: string;
+  account_balance_idr?: number;
+  risk_percentage?: number;
 }
 
 export interface Portfolio {

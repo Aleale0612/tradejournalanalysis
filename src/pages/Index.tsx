@@ -15,10 +15,11 @@ import {
   LogOut,
   User
 } from 'lucide-react';
+import { PortfolioStats } from '@/components/trading/PortfolioStats';
 import { TradeForm } from '@/components/trading/TradeForm';
 import { TradeList } from '@/components/trading/TradeList';
-import { PortfolioStats } from '@/components/trading/PortfolioStats';
 import { TradingViewWidget } from '@/components/charts/TradingViewWidget';
+import RiskCalculator from '@/components/trading/RiskCalculator';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useTrades, DatabaseTrade } from '@/hooks/useTrades';
 import { useToast } from '@/hooks/use-toast';
@@ -233,9 +234,9 @@ const Index = () => {
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
-              <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Analytics</span>
+            <TabsTrigger value="risk-calculator" className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              <span className="hidden sm:inline">Risk Calc</span>
             </TabsTrigger>
           </TabsList>
 
@@ -300,16 +301,21 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="charts">
-            <div className="flex justify-center">
-              <div className="w-full max-w-5xl">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <TradingViewWidget
-                symbol="OANDA:XAUUSD"
-                title="TradingView Charts"
-                height="600"
+                  symbol="OANDA:XAUUSD"
+                  title="Gold/USD (XAUUSD)"
+                  height="400"
                 />
-                </div>
-                </div>
-                </TabsContent>
+                <TradingViewWidget
+                  symbol="TVC:DXY"
+                  title="US Dollar Index (DXY)"
+                  height="400"
+                />
+              </div>
+            </div>
+          </TabsContent>
 
 
           <TabsContent value="trades">
@@ -363,6 +369,10 @@ const Index = () => {
               } : undefined}
               isEditing={!!editingTrade}
             />
+          </TabsContent>
+
+          <TabsContent value="risk-calculator">
+            <RiskCalculator />
           </TabsContent>
 
           <TabsContent value="analytics">
