@@ -72,9 +72,12 @@ export function useTrades() {
   const addTrade = async (tradeData: Partial<DatabaseTrade>) => {
     if (!user) throw new Error('User not authenticated');
 
+    console.log('useTrades.addTrade called with:', tradeData);
+
     try {
       // Get or create default portfolio
       let portfolio_id = await getDefaultPortfolio();
+      console.log('Portfolio ID:', portfolio_id);
 
       // Ensure required fields are present
       const requiredData = {
@@ -95,6 +98,8 @@ export function useTrades() {
         user_id: user.id,
         portfolio_id,
       };
+      
+      console.log('Processed trade data for insert:', requiredData);
 
       const { data, error } = await supabase
         .from('trades')
@@ -102,9 +107,12 @@ export function useTrades() {
         .select()
         .single();
 
+      console.log('Supabase insert result:', { data, error });
+
       if (error) throw error;
 
       setTrades(prev => [data, ...prev]);
+      console.log('Trade added successfully to state');
       return data;
     } catch (err: any) {
       console.error('Error adding trade:', err);

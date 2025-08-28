@@ -37,14 +37,19 @@ export function TradeForm({ onSubmit, initialData, isEditing = false }: TradeFor
     tradeType: 'BUY',
     entryDate: new Date().toISOString().split('T')[0],
     fees: 0,
+    status: 'OPEN',
     ...initialData,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submission started:', formData);
+    
     const validationErrors = validateTradeInput(formData);
     setErrors(validationErrors);
+    
+    console.log('Validation errors:', validationErrors);
     
     if (validationErrors.length > 0) {
       toast({
@@ -57,6 +62,7 @@ export function TradeForm({ onSubmit, initialData, isEditing = false }: TradeFor
 
     setLoading(true);
     try {
+      console.log('Calling onSubmit with:', formData);
       await onSubmit(formData);
       toast({
         title: isEditing ? "Trade Updated" : "Trade Added",
@@ -70,9 +76,11 @@ export function TradeForm({ onSubmit, initialData, isEditing = false }: TradeFor
           tradeType: 'BUY',
           entryDate: new Date().toISOString().split('T')[0],
           fees: 0,
+          status: 'OPEN',
         });
       }
     } catch (error) {
+      console.error('Form submission error:', error);
       toast({
         title: "Error",
         description: `Failed to ${isEditing ? 'update' : 'add'} trade`,

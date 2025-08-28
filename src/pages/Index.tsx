@@ -48,8 +48,9 @@ const Index = () => {
   }
 
   const handleAddTrade = async (tradeData: any) => {
+    console.log('handleAddTrade called with:', tradeData);
     try {
-      await addTrade({
+      const dbTradeData = {
         symbol: tradeData.symbol,
         trade_type: tradeData.tradeType,
         status: tradeData.status || 'open',
@@ -64,7 +65,11 @@ const Index = () => {
         strategy: tradeData.strategy || null,
         setup_description: tradeData.notes || null,
         tags: tradeData.tags || null
-      });
+      };
+      
+      console.log('Calling addTrade with transformed data:', dbTradeData);
+      await addTrade(dbTradeData);
+      console.log('addTrade completed successfully');
       setActiveTab('trades');
       toast({
         title: "Trade Added",
@@ -74,7 +79,7 @@ const Index = () => {
       console.error('Error adding trade:', error);
       toast({
         title: "Error",
-        description: "Failed to add trade",
+        description: error.message || "Failed to add trade",
         variant: "destructive",
       });
       throw error;
