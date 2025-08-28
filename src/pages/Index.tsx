@@ -56,12 +56,14 @@ const Index = () => {
         entry_price: tradeData.entryPrice,
         exit_price: tradeData.exitPrice,
         quantity: tradeData.quantity,
-        entry_date: tradeData.entryDate,
-        exit_date: tradeData.exitDate,
+        entry_date: tradeData.entryDate ? new Date(tradeData.entryDate).toISOString() : new Date().toISOString(),
+        exit_date: tradeData.exitDate ? new Date(tradeData.exitDate).toISOString() : null,
         fees: tradeData.fees || 0,
-        strategy: tradeData.strategy,
-        setup_description: tradeData.notes,
-        tags: tradeData.tags
+        stop_loss: tradeData.stopLoss || null,
+        take_profit: tradeData.takeProfit || null,
+        strategy: tradeData.strategy || null,
+        setup_description: tradeData.notes || null,
+        tags: tradeData.tags || null
       });
       setActiveTab('trades');
       toast({
@@ -86,16 +88,18 @@ const Index = () => {
       await updateTrade(editingTrade.id, {
         symbol: tradeData.symbol,
         trade_type: tradeData.tradeType,
-        status: tradeData.status,
+        status: tradeData.status || 'open',
         entry_price: tradeData.entryPrice,
         exit_price: tradeData.exitPrice,
         quantity: tradeData.quantity,
-        entry_date: tradeData.entryDate,
-        exit_date: tradeData.exitDate,
+        entry_date: tradeData.entryDate ? new Date(tradeData.entryDate).toISOString() : editingTrade.entry_date,
+        exit_date: tradeData.exitDate ? new Date(tradeData.exitDate).toISOString() : null,
         fees: tradeData.fees || 0,
-        strategy: tradeData.strategy,
-        setup_description: tradeData.notes,
-        tags: tradeData.tags
+        stop_loss: tradeData.stopLoss || null,
+        take_profit: tradeData.takeProfit || null,
+        strategy: tradeData.strategy || null,
+        setup_description: tradeData.notes || null,
+        tags: tradeData.tags || null
       });
       
       setEditingTrade(null);
@@ -302,18 +306,11 @@ const Index = () => {
 
           <TabsContent value="charts">
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <TradingViewWidget
-                  symbol="OANDA:XAUUSD"
-                  title="Gold/USD (XAUUSD)"
-                  height="400"
-                />
-                <TradingViewWidget
-                  symbol="TVC:DXY"
-                  title="US Dollar Index (DXY)"
-                  height="400"
-                />
-              </div>
+              <TradingViewWidget
+                symbol="PEPPERSTONE:XAUUSD"
+                title="Gold/USD (XAUUSD) - Pepperstone"
+                height="600"
+              />
             </div>
           </TabsContent>
 
@@ -362,9 +359,11 @@ const Index = () => {
                 entryPrice: editingTrade.entry_price,
                 exitPrice: editingTrade.exit_price,
                 quantity: editingTrade.quantity,
-                entryDate: editingTrade.entry_date,
-                exitDate: editingTrade.exit_date,
+                entryDate: editingTrade.entry_date ? new Date(editingTrade.entry_date).toISOString().split('T')[0] : '',
+                exitDate: editingTrade.exit_date ? new Date(editingTrade.exit_date).toISOString().split('T')[0] : '',
                 fees: editingTrade.fees,
+                stopLoss: editingTrade.stop_loss,
+                takeProfit: editingTrade.take_profit,
                 notes: editingTrade.setup_description,
               } : undefined}
               isEditing={!!editingTrade}

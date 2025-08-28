@@ -47,12 +47,7 @@ export function TradingViewWidget({
       details: true,
       hotlist: true,
       calendar: false,
-      studies: [
-        "STD;SMA",
-        "STD;EMA",
-        "STD;RSI",
-        "STD;MACD"
-      ],
+      studies: [],
       show_popup_button: true,
       popup_width: "1000",
       popup_height: "650",

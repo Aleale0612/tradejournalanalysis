@@ -17,6 +17,8 @@ export interface DatabaseTrade {
   exit_date?: string;
   profit_loss?: number;
   fees: number;
+  stop_loss?: number;
+  take_profit?: number;
   strategy?: string;
   setup_description?: string;
   tags?: string[];
@@ -85,6 +87,8 @@ export function useTrades() {
         entry_date: tradeData.entry_date || new Date().toISOString().split('T')[0],
         exit_date: tradeData.exit_date,
         fees: tradeData.fees || 0,
+        stop_loss: tradeData.stop_loss,
+        take_profit: tradeData.take_profit,
         strategy: tradeData.strategy,
         setup_description: tradeData.setup_description,
         tags: tradeData.tags,
