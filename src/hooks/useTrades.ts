@@ -3,25 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
+// Interface matching the new secure trades table
 export interface DatabaseTrade {
   id: string;
   user_id: string;
-  portfolio_id: string;
-  symbol: string;
+  asset: string;
   trade_type: string;
-  status: string;
-  entry_price: number;
-  exit_price?: number;
+  price: number;
   quantity: number;
-  entry_date: string;
-  exit_date?: string;
-  profit_loss?: number;
-  fees: number;
   stop_loss?: number;
   take_profit?: number;
-  strategy?: string;
-  setup_description?: string;
-  tags?: string[];
+  profit_loss?: number;
+  status: string;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
@@ -47,7 +41,7 @@ export function useTrades() {
         .from('trades')
         .select('*')
         .eq('user_id', user.id)
-        .order('entry_date', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw error;
@@ -75,28 +69,18 @@ export function useTrades() {
     console.log('useTrades.addTrade called with:', tradeData);
 
     try {
-      // Get or create default portfolio
-      let portfolio_id = await getDefaultPortfolio();
-      console.log('Portfolio ID:', portfolio_id);
-
       // Ensure required fields are present
       const requiredData = {
-        symbol: tradeData.symbol || '',
+        asset: tradeData.asset || '',
         trade_type: tradeData.trade_type || 'BUY',
-        status: tradeData.status || 'open',
-        entry_price: tradeData.entry_price || 0,
-        exit_price: tradeData.exit_price,
+        price: tradeData.price || 0,
         quantity: tradeData.quantity || 1,
-        entry_date: tradeData.entry_date || new Date().toISOString().split('T')[0],
-        exit_date: tradeData.exit_date,
-        fees: tradeData.fees || 0,
         stop_loss: tradeData.stop_loss,
         take_profit: tradeData.take_profit,
-        strategy: tradeData.strategy,
-        setup_description: tradeData.setup_description,
-        tags: tradeData.tags,
+        profit_loss: tradeData.profit_loss || 0,
+        status: tradeData.status || 'open',
+        notes: tradeData.notes,
         user_id: user.id,
-        portfolio_id,
       };
       
       console.log('Processed trade data for insert:', requiredData);
@@ -168,46 +152,6 @@ export function useTrades() {
     }
   };
 
-  // Get or create default portfolio
-  const getDefaultPortfolio = async (): Promise<string> => {
-    if (!user) throw new Error('User not authenticated');
-
-    try {
-      // Check if user has any portfolios
-      const { data: existingPortfolios, error: fetchError } = await supabase
-        .from('portfolios')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
-
-      if (fetchError) throw fetchError;
-
-      if (existingPortfolios && existingPortfolios.length > 0) {
-        return existingPortfolios[0].id;
-      }
-
-      // Create default portfolio
-      const { data, error } = await supabase
-        .from('portfolios')
-        .insert({
-          user_id: user.id,
-          name: 'Default Portfolio',
-          initial_balance: 10000,
-          current_balance: 10000,
-          currency: 'USD',
-          is_active: true
-        })
-        .select('id')
-        .single();
-
-      if (error) throw error;
-
-      return data.id;
-    } catch (err: any) {
-      console.error('Error with portfolio:', err);
-      throw err;
-    }
-  };
 
   // Set up real-time subscription
   useEffect(() => {

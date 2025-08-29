@@ -260,15 +260,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "psychological_notes_trade_id_fkey"
-            columns: ["trade_id"]
-            isOneToOne: false
-            referencedRelation: "trades"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       risk_calculations: {
         Row: {
@@ -320,98 +312,138 @@ export type Database = {
       }
       trades: {
         Row: {
-          account_balance_idr: number | null
+          asset: string
           created_at: string
-          currency: string | null
-          entry_date: string
-          entry_price: number
-          exit_date: string | null
-          exit_price: number | null
-          fees: number | null
           id: string
-          lot_size: number | null
-          portfolio_id: string
+          notes: string | null
+          price: number
           profit_loss: number | null
           quantity: number
-          risk_amount_idr: number | null
-          risk_percentage: number | null
-          risk_reward_ratio: number | null
-          setup_description: string | null
           status: string
           stop_loss: number | null
-          strategy: string | null
-          symbol: string
-          tags: string[] | null
           take_profit: number | null
           trade_type: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          account_balance_idr?: number | null
+          asset: string
           created_at?: string
-          currency?: string | null
-          entry_date: string
-          entry_price: number
-          exit_date?: string | null
-          exit_price?: number | null
-          fees?: number | null
           id?: string
-          lot_size?: number | null
-          portfolio_id: string
+          notes?: string | null
+          price: number
           profit_loss?: number | null
           quantity: number
-          risk_amount_idr?: number | null
-          risk_percentage?: number | null
-          risk_reward_ratio?: number | null
-          setup_description?: string | null
           status?: string
           stop_loss?: number | null
-          strategy?: string | null
-          symbol: string
-          tags?: string[] | null
           take_profit?: number | null
           trade_type: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          account_balance_idr?: number | null
+          asset?: string
           created_at?: string
-          currency?: string | null
-          entry_date?: string
-          entry_price?: number
-          exit_date?: string | null
-          exit_price?: number | null
-          fees?: number | null
           id?: string
-          lot_size?: number | null
-          portfolio_id?: string
+          notes?: string | null
+          price?: number
           profit_loss?: number | null
           quantity?: number
-          risk_amount_idr?: number | null
-          risk_percentage?: number | null
-          risk_reward_ratio?: number | null
-          setup_description?: string | null
           status?: string
           stop_loss?: number | null
-          strategy?: string | null
-          symbol?: string
-          tags?: string[] | null
           take_profit?: number | null
           trade_type?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "trades_portfolio_id_fkey"
-            columns: ["portfolio_id"]
-            isOneToOne: false
-            referencedRelation: "portfolios"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      trades_backup: {
+        Row: {
+          account_balance_idr: number | null
+          created_at: string | null
+          currency: string | null
+          entry_date: string | null
+          entry_price: number | null
+          exit_date: string | null
+          exit_price: number | null
+          fees: number | null
+          id: string | null
+          lot_size: number | null
+          portfolio_id: string | null
+          profit_loss: number | null
+          quantity: number | null
+          risk_amount_idr: number | null
+          risk_percentage: number | null
+          risk_reward_ratio: number | null
+          setup_description: string | null
+          status: string | null
+          stop_loss: number | null
+          strategy: string | null
+          symbol: string | null
+          tags: string[] | null
+          take_profit: number | null
+          trade_type: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_balance_idr?: number | null
+          created_at?: string | null
+          currency?: string | null
+          entry_date?: string | null
+          entry_price?: number | null
+          exit_date?: string | null
+          exit_price?: number | null
+          fees?: number | null
+          id?: string | null
+          lot_size?: number | null
+          portfolio_id?: string | null
+          profit_loss?: number | null
+          quantity?: number | null
+          risk_amount_idr?: number | null
+          risk_percentage?: number | null
+          risk_reward_ratio?: number | null
+          setup_description?: string | null
+          status?: string | null
+          stop_loss?: number | null
+          strategy?: string | null
+          symbol?: string | null
+          tags?: string[] | null
+          take_profit?: number | null
+          trade_type?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_balance_idr?: number | null
+          created_at?: string | null
+          currency?: string | null
+          entry_date?: string | null
+          entry_price?: number | null
+          exit_date?: string | null
+          exit_price?: number | null
+          fees?: number | null
+          id?: string | null
+          lot_size?: number | null
+          portfolio_id?: string | null
+          profit_loss?: number | null
+          quantity?: number | null
+          risk_amount_idr?: number | null
+          risk_percentage?: number | null
+          risk_reward_ratio?: number | null
+          setup_description?: string | null
+          status?: string | null
+          stop_loss?: number | null
+          strategy?: string | null
+          symbol?: string | null
+          tags?: string[] | null
+          take_profit?: number | null
+          trade_type?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       weekly_reviews: {
         Row: {
