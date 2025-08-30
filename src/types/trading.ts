@@ -70,12 +70,6 @@ export const COMMODITIES = [
   { symbol: 'NATGAS', name: 'Natural Gas' },
 ];
 
-// Calculate PnL for a trade
-export function calculatePnL(trade: Trade): number {
-  if (trade.status !== 'closed' || !trade.profit_loss) return 0;
-  return trade.profit_loss;
-}
-
 export function formatCurrency(amount: number, currency: string = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
