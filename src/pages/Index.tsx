@@ -23,6 +23,7 @@ import RiskCalculator from '@/components/trading/RiskCalculator';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useTrades, DatabaseTrade } from '@/hooks/useTrades';
 import { useToast } from '@/hooks/use-toast';
+import { Trade } from '@/types/trading';
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -47,33 +48,15 @@ const Index = () => {
     );
   }
 
-  const handleAddTrade = async (tradeData: any) => {
+  const handleAddTrade = async (tradeData: Partial<Trade>) => {
     console.log('handleAddTrade called with:', tradeData);
     try {
-      const dbTradeData = {
-        symbol: tradeData.symbol,
-        trade_type: tradeData.tradeType,
-        status: tradeData.status || 'open',
-        entry_price: tradeData.entryPrice,
-        exit_price: tradeData.exitPrice,
-        quantity: tradeData.quantity,
-        entry_date: tradeData.entryDate ? new Date(tradeData.entryDate).toISOString() : new Date().toISOString(),
-        exit_date: tradeData.exitDate ? new Date(tradeData.exitDate).toISOString() : null,
-        fees: tradeData.fees || 0,
-        stop_loss: tradeData.stopLoss || null,
-        take_profit: tradeData.takeProfit || null,
-        strategy: tradeData.strategy || null,
-        setup_description: tradeData.notes || null,
-        tags: tradeData.tags || null
-      };
-      
-      console.log('Calling addTrade with transformed data:', dbTradeData);
-      await addTrade(dbTradeData);
+      await addTrade(tradeData);
       console.log('addTrade completed successfully');
       setActiveTab('trades');
       toast({
         title: "Trade Added",
-        description: `Successfully added ${tradeData.symbol} trade`,
+        description: `Successfully added ${tradeData.asset} trade`,
       });
     } catch (error: any) {
       console.error('Error adding trade:', error);
@@ -86,32 +69,16 @@ const Index = () => {
     }
   };
 
-  const handleEditTrade = async (tradeData: any) => {
+  const handleEditTrade = async (tradeData: Partial<Trade>) => {
     if (!editingTrade) return;
     
     try {
-      await updateTrade(editingTrade.id, {
-        symbol: tradeData.symbol,
-        trade_type: tradeData.tradeType,
-        status: tradeData.status || 'open',
-        entry_price: tradeData.entryPrice,
-        exit_price: tradeData.exitPrice,
-        quantity: tradeData.quantity,
-        entry_date: tradeData.entryDate ? new Date(tradeData.entryDate).toISOString() : editingTrade.entry_date,
-        exit_date: tradeData.exitDate ? new Date(tradeData.exitDate).toISOString() : null,
-        fees: tradeData.fees || 0,
-        stop_loss: tradeData.stopLoss || null,
-        take_profit: tradeData.takeProfit || null,
-        strategy: tradeData.strategy || null,
-        setup_description: tradeData.notes || null,
-        tags: tradeData.tags || null
-      });
-      
+      await updateTrade(editingTrade.id, tradeData);
       setEditingTrade(null);
       setActiveTab('trades');
       toast({
         title: "Trade Updated",
-        description: `Successfully updated ${tradeData.symbol} trade`,
+        description: `Successfully updated ${tradeData.asset} trade`,
       });
     } catch (error: any) {
       console.error('Error updating trade:', error);
@@ -159,6 +126,23 @@ const Index = () => {
     }
   };
 
+  // Convert DatabaseTrade to Trade for components
+  const convertedTrades: Trade[] = trades.map(trade => ({
+    id: trade.id,
+    user_id: trade.user_id,
+    asset: trade.asset,
+    trade_type: trade.trade_type as 'BUY' | 'SELL',
+    price: trade.price,
+    quantity: trade.quantity,
+    stop_loss: trade.stop_loss,
+    take_profit: trade.take_profit,
+    profit_loss: trade.profit_loss,
+    status: trade.status as 'open' | 'closed' | 'cancelled',
+    notes: trade.notes,
+    created_at: trade.created_at,
+    updated_at: trade.updated_at,
+  }));
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -172,7 +156,7 @@ const Index = () => {
               <div>
                 <h1 className="text-2xl font-bold">JournalPaper</h1>
                 <p className="text-sm text-muted-foreground">
-                 Journaling One Step for the futures.
+                  Trading journal for better decisions
                 </p>
               </div>
             </div>
@@ -271,41 +255,21 @@ const Index = () => {
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-neutral">
-                        {trades.filter(t => t.symbol?.includes('/')).length}
+                        {trades.filter(t => t.asset?.includes('USD')).length}
                       </div>
-                      <div className="text-sm text-muted-foreground">Forex Trades</div>
+                      <div className="text-sm text-muted-foreground">USD Pairs</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-amber-400">
-                        {trades.filter(t => t.symbol?.includes('XAUUSD') || t.symbol?.includes('DXY')).length}
+                        {trades.filter(t => t.asset?.includes('XAU')).length}
                       </div>
-                      <div className="text-sm text-muted-foreground">Commodities</div>
+                      <div className="text-sm text-muted-foreground">Gold Trades</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <PortfolioStats trades={trades.map(trade => ({
-                id: trade.id,
-                userId: trade.user_id,
-                assetType: trade.symbol?.includes('/') ? 'FOREX' as const : 
-                          trade.symbol?.includes('XAUUSD') || trade.symbol?.includes('DXY') ? 'COMMODITY' as const :
-                          'STOCK' as const,
-                symbol: trade.symbol,
-                assetName: trade.symbol,
-                tradeType: trade.trade_type === 'BUY' ? 'BUY' as const : 'SELL' as const,
-                status: trade.status === 'open' ? 'OPEN' as const : 
-                       trade.status === 'closed' ? 'CLOSED' as const : 'PENDING' as const,
-                entryPrice: trade.entry_price,
-                exitPrice: trade.exit_price,
-                quantity: trade.quantity,
-                entryDate: trade.entry_date,
-                exitDate: trade.exit_date,
-                fees: trade.fees,
-                notes: trade.setup_description,
-                createdAt: trade.created_at,
-                updatedAt: trade.updated_at,
-              }))} />
+              <PortfolioStats trades={convertedTrades} />
             </div>
           </TabsContent>
 
@@ -319,30 +283,9 @@ const Index = () => {
             </div>
           </TabsContent>
 
-
           <TabsContent value="trades">
             <TradeList
-              trades={trades.map(trade => ({
-                id: trade.id,
-                userId: trade.user_id,
-                assetType: trade.symbol?.includes('/') ? 'FOREX' as const : 
-                          trade.symbol?.includes('XAUUSD') || trade.symbol?.includes('DXY') ? 'COMMODITY' as const :
-                          'STOCK' as const,
-                symbol: trade.symbol,
-                assetName: trade.symbol,
-                tradeType: trade.trade_type === 'BUY' ? 'BUY' as const : 'SELL' as const,
-                status: trade.status === 'open' ? 'OPEN' as const : 
-                       trade.status === 'closed' ? 'CLOSED' as const : 'PENDING' as const,
-                entryPrice: trade.entry_price,
-                exitPrice: trade.exit_price,
-                quantity: trade.quantity,
-                entryDate: trade.entry_date,
-                exitDate: trade.exit_date,
-                fees: trade.fees,
-                notes: trade.setup_description,
-                createdAt: trade.created_at,
-                updatedAt: trade.updated_at,
-              }))}
+              trades={convertedTrades}
               onEdit={(trade) => {
                 const dbTrade = trades.find(t => t.id === trade.id);
                 if (dbTrade) {
@@ -359,17 +302,13 @@ const Index = () => {
             <TradeForm
               onSubmit={editingTrade ? handleEditTrade : handleAddTrade}
               initialData={editingTrade ? {
-                symbol: editingTrade.symbol,
-                tradeType: editingTrade.trade_type === 'BUY' ? 'BUY' : 'SELL',
-                entryPrice: editingTrade.entry_price,
-                exitPrice: editingTrade.exit_price,
+                asset: editingTrade.asset,
+                trade_type: editingTrade.trade_type as 'BUY' | 'SELL',
+                price: editingTrade.price,
                 quantity: editingTrade.quantity,
-                entryDate: editingTrade.entry_date ? new Date(editingTrade.entry_date).toISOString().split('T')[0] : '',
-                exitDate: editingTrade.exit_date ? new Date(editingTrade.exit_date).toISOString().split('T')[0] : '',
-                fees: editingTrade.fees,
-                stopLoss: editingTrade.stop_loss,
-                takeProfit: editingTrade.take_profit,
-                notes: editingTrade.setup_description,
+                stop_loss: editingTrade.stop_loss,
+                take_profit: editingTrade.take_profit,
+                notes: editingTrade.notes,
               } : undefined}
               isEditing={!!editingTrade}
             />
@@ -377,30 +316,6 @@ const Index = () => {
 
           <TabsContent value="risk-calculator">
             <RiskCalculator />
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <PortfolioStats trades={trades.map(trade => ({
-              id: trade.id,
-              userId: trade.user_id,
-              assetType: trade.symbol?.includes('/') ? 'FOREX' as const : 
-                        trade.symbol?.includes('XAUUSD') || trade.symbol?.includes('DXY') ? 'COMMODITY' as const :
-                        'STOCK' as const,
-              symbol: trade.symbol,
-              assetName: trade.symbol,
-              tradeType: trade.trade_type === 'BUY' ? 'BUY' as const : 'SELL' as const,
-              status: trade.status === 'open' ? 'OPEN' as const : 
-                     trade.status === 'closed' ? 'CLOSED' as const : 'PENDING' as const,
-              entryPrice: trade.entry_price,
-              exitPrice: trade.exit_price,
-              quantity: trade.quantity,
-              entryDate: trade.entry_date,
-              exitDate: trade.exit_date,
-              fees: trade.fees,
-              notes: trade.setup_description,
-              createdAt: trade.created_at,
-              updatedAt: trade.updated_at,
-            }))} />
           </TabsContent>
         </Tabs>
       </main>

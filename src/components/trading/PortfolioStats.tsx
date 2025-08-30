@@ -11,7 +11,7 @@ import {
   Calculator,
   Trophy
 } from 'lucide-react';
-import { Trade, Portfolio, calculatePnL, formatCurrency } from '@/types/trading';
+import { Trade, Portfolio, formatCurrency } from '@/types/trading';
 
 interface PortfolioStatsProps {
   trades: Trade[];
@@ -19,7 +19,7 @@ interface PortfolioStatsProps {
 
 export function PortfolioStats({ trades }: PortfolioStatsProps) {
   const calculatePortfolioStats = (trades: Trade[]): Portfolio => {
-    const closedTrades = trades.filter(trade => trade.status === 'CLOSED');
+    const closedTrades = trades.filter(trade => trade.status === 'closed');
     const totalTrades = closedTrades.length;
     
     if (totalTrades === 0) {
@@ -29,7 +29,7 @@ export function PortfolioStats({ trades }: PortfolioStatsProps) {
         losingTrades: 0,
         winRate: 0,
         totalProfit: 0,
-        totalFees: trades.reduce((sum, trade) => sum + trade.fees, 0),
+        totalFees: 0,
         netProfit: 0,
         averageWin: 0,
         averageLoss: 0,
@@ -37,13 +37,13 @@ export function PortfolioStats({ trades }: PortfolioStatsProps) {
       };
     }
 
-    const pnlResults = closedTrades.map(calculatePnL);
+    const pnlResults = closedTrades.map(trade => trade.profit_loss || 0);
     const winningTrades = pnlResults.filter(pnl => pnl > 0);
     const losingTrades = pnlResults.filter(pnl => pnl < 0);
     
     const totalProfit = pnlResults.reduce((sum, pnl) => sum + (pnl > 0 ? pnl : 0), 0);
     const totalLoss = Math.abs(pnlResults.reduce((sum, pnl) => sum + (pnl < 0 ? pnl : 0), 0));
-    const totalFees = trades.reduce((sum, trade) => sum + trade.fees, 0);
+    const totalFees = 0; // No fees field in simplified schema
     const netProfit = pnlResults.reduce((sum, pnl) => sum + pnl, 0);
     
     return {
@@ -61,8 +61,8 @@ export function PortfolioStats({ trades }: PortfolioStatsProps) {
   };
 
   const stats = calculatePortfolioStats(trades);
-  const openTrades = trades.filter(trade => trade.status === 'OPEN').length;
-  const pendingTrades = trades.filter(trade => trade.status === 'PENDING').length;
+  const openTrades = trades.filter(trade => trade.status === 'open').length;
+  const pendingTrades = trades.filter(trade => trade.status === 'cancelled').length;
 
   const StatCard = ({ 
     title, 

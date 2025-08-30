@@ -22,7 +22,7 @@ import {
   Calendar,
   Target
 } from 'lucide-react';
-import { Trade, AssetType, TradeStatus, calculatePnL, formatCurrency } from '@/types/trading';
+import { Trade, TradeStatus, formatCurrency } from '@/types/trading';
 
 interface TradeListProps {
   trades: Trade[];
@@ -33,39 +33,14 @@ interface TradeListProps {
 
 export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterAssetType, setFilterAssetType] = useState<AssetType | 'ALL'>('ALL');
   const [filterStatus, setFilterStatus] = useState<TradeStatus | 'ALL'>('ALL');
 
   const filteredTrades = trades.filter(trade => {
-    const matchesSearch = trade.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         trade.assetName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesAssetType = filterAssetType === 'ALL' || trade.assetType === filterAssetType;
+    const matchesSearch = trade.asset?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'ALL' || trade.status === filterStatus;
     
-    return matchesSearch && matchesAssetType && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
-
-  const getAssetTypeBadge = (assetType: AssetType) => {
-    const variants = {
-      STOCK: 'secondary',
-      FOREX: 'default',
-      COMMODITY: 'outline',
-      CRYPTO: 'destructive',
-    } as const;
-
-    const colors = {
-      STOCK: 'text-slate-400',
-      FOREX: 'text-blue-400',
-      COMMODITY: 'text-amber-400',
-      CRYPTO: 'text-purple-400',
-    };
-
-    return (
-      <Badge variant={variants[assetType]} className={colors[assetType]}>
-        {assetType}
-      </Badge>
-    );
-  };
 
   const getTradeTypeBadge = (tradeType: string) => {
     return tradeType === 'BUY' ? (
@@ -83,26 +58,25 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
 
   const getStatusBadge = (status: TradeStatus) => {
     const variants = {
-      OPEN: 'default',
-      CLOSED: 'secondary',
-      PENDING: 'outline',
+      open: 'default',
+      closed: 'secondary',
+      cancelled: 'outline',
     } as const;
 
     return (
       <Badge variant={variants[status]}>
-        {status}
+        {status.toUpperCase()}
       </Badge>
     );
   };
 
   const getPnLDisplay = (trade: Trade) => {
-    const pnl = calculatePnL(trade);
-    if (trade.status !== 'CLOSED') return '-';
+    if (trade.status !== 'closed' || !trade.profit_loss) return '-';
     
-    const isProfit = pnl > 0;
+    const isProfit = trade.profit_loss > 0;
     return (
       <span className={isProfit ? 'text-profit font-medium' : 'text-loss font-medium'}>
-        {formatCurrency(pnl)}
+        {formatCurrency(trade.profit_loss)}
       </span>
     );
   };
@@ -136,7 +110,7 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by symbol or name..."
+              placeholder="Search by asset symbol..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -144,29 +118,16 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
           </div>
           
           <div className="flex gap-2">
-            <Select value={filterAssetType} onValueChange={(value: AssetType | 'ALL') => setFilterAssetType(value)}>
-              <SelectTrigger className="w-40">
+            <Select value={filterStatus} onValueChange={(value: TradeStatus | 'ALL') => setFilterStatus(value)}>
+              <SelectTrigger className="w-32">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All Assets</SelectItem>
-                <SelectItem value="STOCK">Stocks</SelectItem>
-                <SelectItem value="FOREX">Forex</SelectItem>
-                <SelectItem value="COMMODITY">Commodities</SelectItem>
-                <SelectItem value="CRYPTO">Crypto</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterStatus} onValueChange={(value: TradeStatus | 'ALL') => setFilterStatus(value)}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
                 <SelectItem value="ALL">All Status</SelectItem>
-                <SelectItem value="OPEN">Open</SelectItem>
-                <SelectItem value="CLOSED">Closed</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -179,7 +140,7 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
             <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No trades found</h3>
             <p className="text-muted-foreground">
-              {searchTerm || filterAssetType !== 'ALL' || filterStatus !== 'ALL'
+              {searchTerm || filterStatus !== 'ALL'
                 ? 'Try adjusting your filters'
                 : 'Add your first trade to get started'
               }
@@ -192,8 +153,7 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
                 <TableRow>
                   <TableHead>Asset</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Entry</TableHead>
-                  <TableHead>Exit</TableHead>
+                  <TableHead>Price</TableHead>
                   <TableHead>Quantity</TableHead>
                   <TableHead>P&L</TableHead>
                   <TableHead>Status</TableHead>
@@ -205,23 +165,15 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
                 {filteredTrades.map((trade) => (
                   <TableRow key={trade.id} className="hover:bg-card-elevated">
                     <TableCell>
-                      <div>
-                        <div className="font-mono font-medium text-sm">{trade.symbol}</div>
-                        <div className="text-xs text-muted-foreground">{trade.assetName}</div>
-                        <div className="mt-1">{getAssetTypeBadge(trade.assetType)}</div>
-                      </div>
+                      <div className="font-mono font-medium text-sm">{trade.asset}</div>
                     </TableCell>
                     
                     <TableCell>
-                      {getTradeTypeBadge(trade.tradeType)}
+                      {getTradeTypeBadge(trade.trade_type)}
                     </TableCell>
                     
                     <TableCell className="font-mono text-sm">
-                      {formatCurrency(trade.entryPrice)}
-                    </TableCell>
-                    
-                    <TableCell className="font-mono text-sm">
-                      {trade.exitPrice ? formatCurrency(trade.exitPrice) : '-'}
+                      {formatCurrency(trade.price)}
                     </TableCell>
                     
                     <TableCell className="font-mono text-sm">
@@ -239,7 +191,7 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="w-3 h-3" />
-                        {new Date(trade.entryDate).toLocaleDateString()}
+                        {trade.created_at ? new Date(trade.created_at).toLocaleDateString() : 'N/A'}
                       </div>
                     </TableCell>
                     
@@ -256,7 +208,7 @@ export function TradeList({ trades, onEdit, onDelete, loading = false }: TradeLi
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onDelete(trade.id)}
+                          onClick={() => onDelete(trade.id!)}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="w-4 h-4" />

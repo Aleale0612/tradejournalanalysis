@@ -1,6 +1,6 @@
 export type TradeType = 'BUY' | 'SELL';
-
 export type TradeStatus = 'open' | 'closed' | 'cancelled';
+export type AssetType = 'STOCK' | 'FOREX' | 'COMMODITY' | 'CRYPTO';
 
 // Simplified Trade interface matching the new secure database schema
 export interface Trade {
@@ -61,6 +61,20 @@ export const CRYPTO_PAIRS = [
   { symbol: 'SOLUSD', name: 'Solana / US Dollar' },
   { symbol: 'DOTUSD', name: 'Polkadot / US Dollar' },
 ];
+
+export const COMMODITIES = [
+  { symbol: 'XAUUSD', name: 'Gold / US Dollar' },
+  { symbol: 'XAGUSD', name: 'Silver / US Dollar' },
+  { symbol: 'USOIL', name: 'US Oil' },
+  { symbol: 'UKOIL', name: 'UK Oil' },
+  { symbol: 'NATGAS', name: 'Natural Gas' },
+];
+
+// Calculate PnL for a trade
+export function calculatePnL(trade: Trade): number {
+  if (trade.status !== 'closed' || !trade.profit_loss) return 0;
+  return trade.profit_loss;
+}
 
 export function formatCurrency(amount: number, currency: string = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
