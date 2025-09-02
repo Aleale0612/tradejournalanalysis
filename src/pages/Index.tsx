@@ -13,13 +13,16 @@ import {
   Target,
   DollarSign,
   LogOut,
-  User
+  User,
+  MessageCircle
 } from 'lucide-react';
 import { PortfolioStats } from '@/components/trading/PortfolioStats';
 import { TradeForm } from '@/components/trading/TradeForm';
 import { TradeList } from '@/components/trading/TradeList';
 import { TradingViewWidget } from '@/components/charts/TradingViewWidget';
 import RiskCalculator from '@/components/trading/RiskCalculator';
+import { TradingAssistant } from '@/components/trading/TradingAssistant';
+import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useTrades, DatabaseTrade } from '@/hooks/useTrades';
 import { useToast } from '@/hooks/use-toast';
@@ -31,6 +34,7 @@ const Index = () => {
   const { toast } = useToast();
   const [editingTrade, setEditingTrade] = useState<DatabaseTrade | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
 
   // Redirect to auth if not logged in
   if (!authLoading && !user) {
@@ -319,6 +323,22 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* AI Trading Assistant */}
+      <TradingAssistant
+        trades={convertedTrades}
+        isOpen={isAIAssistantOpen}
+        onToggle={() => setIsAIAssistantOpen(!isAIAssistantOpen)}
+      />
+
+      {/* Floating Action Button for AI Assistant */}
+      {!isAIAssistantOpen && (
+        <FloatingActionButton
+          onClick={() => setIsAIAssistantOpen(true)}
+          icon={<MessageCircle className="w-6 h-6" />}
+          isActive={isAIAssistantOpen}
+        />
+      )}
     </div>
   );
 };
