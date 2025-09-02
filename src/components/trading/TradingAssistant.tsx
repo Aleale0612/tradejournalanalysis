@@ -240,9 +240,9 @@ Atau tanya apa saja tentang trading Anda!`;
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-4 top-20 bottom-4 w-96 z-50">
-      <Card className="h-full flex flex-col trading-card bg-card/95 backdrop-blur-sm">
-        <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
+    <div className="fixed right-4 top-20 w-96 z-50 max-h-[calc(100vh-6rem)] md:max-h-none">
+      <Card className="flex flex-col trading-card bg-card/95 backdrop-blur-sm max-h-full">
+        <CardHeader className="flex-row items-center justify-between space-y-0 pb-4 flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-primary/10">
               <Brain className="w-5 h-5 text-primary" />
@@ -271,45 +271,47 @@ Atau tanya apa saja tentang trading Anda!`;
         </CardHeader>
 
         {!isMinimized && (
-          <CardContent className="flex-1 flex flex-col p-0">
-            <ScrollArea className="flex-1 px-4 pb-4">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
+          <CardContent className="flex flex-col p-0 min-h-0">
+            <div className="h-[450px] flex flex-col">
+              <ScrollArea className="flex-1 px-4">
+                <div className="space-y-4 py-2">
+                  {messages.map((message) => (
                     <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
-                        message.type === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
-                      }`}
+                      key={message.id}
+                      className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      {message.type === 'assistant' && message.category && (
-                        <Badge 
-                          variant="secondary" 
-                          className={`mb-2 ${getCategoryColor(message.category)}`}
-                        >
-                          {getCategoryIcon(message.category)}
-                          <span className="ml-1 capitalize">{message.category}</span>
-                        </Badge>
-                      )}
-                      <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-                      <div className="text-xs opacity-60 mt-2">
-                        {message.timestamp.toLocaleTimeString('id-ID', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
+                      <div
+                        className={`max-w-[85%] rounded-lg p-3 break-words ${
+                          message.type === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-foreground'
+                        }`}
+                      >
+                        {message.type === 'assistant' && message.category && (
+                          <Badge 
+                            variant="secondary" 
+                            className={`mb-2 ${getCategoryColor(message.category)}`}
+                          >
+                            {getCategoryIcon(message.category)}
+                            <span className="ml-1 capitalize">{message.category}</span>
+                          </Badge>
+                        )}
+                        <div className="text-sm whitespace-pre-wrap break-words">{message.content}</div>
+                        <div className="text-xs opacity-60 mt-2">
+                          {message.timestamp.toLocaleTimeString('id-ID', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <div ref={messagesEndRef} />
-            </ScrollArea>
+                  ))}
+                </div>
+                <div ref={messagesEndRef} />
+              </ScrollArea>
+            </div>
 
-            <div className="p-4 border-t border-border">
+            <div className="p-4 border-t border-border flex-shrink-0">
               <div className="flex gap-2">
                 <Input
                   value={inputValue}
